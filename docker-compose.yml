@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:12
+    container_name: db
+    restart: always
+    env_file:
+      - ./config/db.env
+
+    volumes:
+      - postgresql:/var/lib/postgresql
+      - postgresql_data:/var/lib/postgresql/data
+
+    networks:
+      - sonarqube
+
+  sonarqube:
+    image: sonarqube:8.6.0-community
+    container_name: sonarqube
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - ./config/sonar.env
+
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
+    ulimits:
+      nproc: 131072
+      nofile:
+        soft: 8192
+        hard: 131072
+
+    ports:
+      - "9000:9000"
+    networks:
+      - sonarqube
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  postgresql:
+  postgresql_data:
+
+
+networks:
+  sonarqube:
+
+
